@@ -13,7 +13,6 @@ public class Payment {
     private Long id;
     private Long userId;
     private String paymentStatus;
-    private String transactionId;
     private double amount;
     private String paymentDate;
 
@@ -49,13 +48,6 @@ public class Payment {
         this.paymentStatus = paymentStatus;
     }
 
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
 
     public double getAmount() {
         return amount;

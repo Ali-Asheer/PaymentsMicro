@@ -69,7 +69,7 @@ public class PaymentController {
                 .collectList(); // Collect all responses into a list
     }
 
-    // Get aa list of payments
+    // Get a list of payments
 
     @GetMapping
     public ResponseEntity < List < Payment >> getAllPayments() {
@@ -81,16 +81,10 @@ public class PaymentController {
     @DeleteMapping("/{id}")
     public ResponseEntity < Void > deletePayment(@PathVariable Long id) {
         Optional < Payment > payment = paymentRepository.findById(id);
-
         if (!payment.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-
-        // If payment exists, delete it
         paymentRepository.delete(payment.get());
-
-        // Optionally: If you need to perform other operations (e.g., cancel the associated order), you can call other microservices here
-
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
