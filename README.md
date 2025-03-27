@@ -3,7 +3,7 @@
  I have build an microservice that is one of four microservices in E-handel application. It connect to user microservices.
  
 REST API endpoints:
--  [POST]  - /payments <=> Creates a new advertised channel. It needs a body like this: Retrieves a list of advertised channels.
+-  [POST]  - /payments <=> Creates a new advertised channel. It needs a body like this:
 ```
 {
     "userId": 2,
