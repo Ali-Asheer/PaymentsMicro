@@ -1,6 +1,5 @@
 package com.E_Handel.BetalningarMicro;
 
-
 public class User {
 
     private Long id;
@@ -13,8 +12,7 @@ public class User {
         this.email = email;
     }
 
-    public User() {
-    }
+    public User() {}
 
     public Long getId() {
         return id;
