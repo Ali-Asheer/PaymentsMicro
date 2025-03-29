@@ -1,9 +1,6 @@
 package com.E_Handel.BetalningarMicro;
 
-
-
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 public class Payment {
@@ -18,10 +15,6 @@ public class Payment {
     private String paymentDate;
 
 
-// Getters and setters
-
-
-
     public Payment() {
     }
 
@@ -32,8 +25,6 @@ public class Payment {
     public void setId(Long id) {
         this.id = id;
     }
-
-
 
     public String getPaymentStatus() {
         return paymentStatus;

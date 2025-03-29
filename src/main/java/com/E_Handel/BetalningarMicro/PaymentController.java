@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +26,7 @@ public class PaymentController {
         this.paymentRepository = paymentRepository;
     }
 
+
     // Create a payment
 
     @PostMapping
@@ -35,12 +35,14 @@ public class PaymentController {
     }
 
 
+    // Get a payment and users and orders by id
+
     @GetMapping("/{id}")
     public Mono<PaymentResponse> getPaymentById(@PathVariable Long id) {
-        // Step 1: Fetch the Payment from the Payment Service using paymentRepository
+        // Fetch the Payment from the Payment Service using paymentRepository
         return paymentRepository.findById(id)
                 .map(payment -> {
-                    // Step 2: Fetch the Order related to the Payment using Order Microservice
+                    // Fetch the Order related to the Payment using Order Microservice
                     return webClientBuilder.baseUrl("http://localhost:8083")  // Order Service URL
                             .build()
                             .get()
@@ -60,6 +62,7 @@ public class PaymentController {
                 })
                 .orElse(Mono.empty()); // Handle case when payment is not found
     }
+
 
 
     // Get all payment and users and orders
@@ -89,7 +92,9 @@ public class PaymentController {
 
                 })
                 .collectList();
+
     }
+
 
     // Get a list of payments
 
@@ -97,6 +102,7 @@ public class PaymentController {
     public ResponseEntity < List < Payment >> getAllPayments() {
         return ResponseEntity.ok(paymentRepository.findAll());
     }
+
 
     // Delete payment by ID
 
@@ -109,6 +115,7 @@ public class PaymentController {
         paymentRepository.delete(payment.get());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
 
     // Update payment details by ID
 
@@ -126,6 +133,5 @@ public class PaymentController {
         Payment updatedPayment = paymentRepository.save(paymentToUpdate);
         return ResponseEntity.status(HttpStatus.OK).body(updatedPayment);
     }
-
 
 }
