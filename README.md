@@ -1,6 +1,6 @@
 ## Microservices-applikation med Spring Boot och MySQL
 
- I have build an microservice that is one of four microservices in E-handel application. It connect to user microservices.
+ I have build a microservice that is one of four microservices in E-handel application. It connect to user microservice an order user microservice.
  
 REST API endpoints:
 -  [POST]  - /payments <=> Creates a new payment. It needs a body like this:
@@ -25,6 +25,9 @@ REST API endpoints:
     "paymentDate": "02-07-2025 22:13:39"
 }
 ```
+
+Made by
+Ali Asheer 2025-03
 
 
 
