@@ -4,19 +4,30 @@ public class PaymentResponse {
 
     private Payment payment;
     private User user;
+    private Order order;
+
+    public PaymentResponse(Payment payment, Order order, User user) {
+        this.payment = payment;
+        this.order = order;
+        this.user = user;
+    }
 
     public PaymentResponse(Payment payment, User user) {
         this.payment = payment;
         this.user = user;
     }
 
-    // Getters and setters
-    public Payment getPayment() {
-        return payment;
+    public PaymentResponse(Payment payment, Order order) {
+        this.payment = payment;
+        this.order = order;
     }
 
-    public void setPayment(Payment payment) {
-        this.payment = payment;
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     public User getUser() {
@@ -25,5 +36,13 @@ public class PaymentResponse {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 }

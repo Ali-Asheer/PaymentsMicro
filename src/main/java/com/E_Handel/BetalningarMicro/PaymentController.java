@@ -13,12 +13,17 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/payments")
 public class PaymentController {
-
+    @Autowired
+    private WebClient.Builder webClientBuilder;
     private final WebClient webclient;
     private final PaymentRepository paymentRepository;
+    private static final String USER_SERVICE_URL = "http://localhost:8081";
+    private static final String ORDER_SERVICE_URL = "http://localhost:8083";
+
+
 
     public PaymentController(WebClient.Builder webclientBuilder, PaymentRepository paymentRepository) {
-        this.webclient = webclientBuilder.baseUrl("http://localhost:8081").build();
+        this.webclient = webclientBuilder.baseUrl("http://localhost:8082").build();
         this.paymentRepository = paymentRepository;
     }
 
@@ -29,44 +34,61 @@ public class PaymentController {
         return paymentRepository.save(payment);
     }
 
-    // Get a payment with user by payment ID
 
     @GetMapping("/{id}")
-    public Mono < PaymentResponse > getPaymentById(@PathVariable Long id) {
-        return paymentRepository.findById(id).map(payment ->
-                        webclient.get()
-                                .uri("/users/" + payment.getUserId())
-                                .retrieve().bodyToMono(User.class)
-                                .map(user -> new PaymentResponse(payment, user)))
-                .orElse(Mono.empty());
+    public Mono<PaymentResponse> getPaymentById(@PathVariable Long id) {
+        // Step 1: Fetch the Payment from the Payment Service using paymentRepository
+        return paymentRepository.findById(id)
+                .map(payment -> {
+                    // Step 2: Fetch the Order related to the Payment using Order Microservice
+                    return webClientBuilder.baseUrl("http://localhost:8083")  // Order Service URL
+                            .build()
+                            .get()
+                            .uri("/orders/{orderId}", payment.getOrderId())  // Fetch Order by Order ID
+                            .retrieve()
+                            .bodyToMono(Order.class)  // Convert response to Mono<Order>
+                            .flatMap(order -> {
+                                // Step 3: Fetch the User related to the Order using User Microservice
+                                return webClientBuilder.baseUrl("http://localhost:8081")  // User Service URL
+                                        .build()
+                                        .get()
+                                        .uri("/users/{userId}", order.getUserId())  // Fetch User by User ID
+                                        .retrieve()
+                                        .bodyToMono(User.class)  // Convert response to Mono<User>
+                                        .map(user -> new PaymentResponse(payment, order, user));  // Combine Payment, Order, and User
+                            });
+                })
+                .orElse(Mono.empty()); // Handle case when payment is not found
     }
 
-    // Get all payment with users
 
-    @Autowired
-    private WebClient.Builder webClientBuilder;
+    // Get all payment and users and orders
 
-    private static final String PAYMENT_SERVICE_URL = "http://localhost:8082"; // Change accordingly
-    private static final String USER_SERVICE_URL = "http://localhost:8081"; // Change accordingly
-
-    @GetMapping("/payment-and-users")
+    @GetMapping("/payments_details")
     public Mono < List < PaymentResponse >> getAllPaymentAndUsers() {
-        WebClient webClient = webClientBuilder.baseUrl(PAYMENT_SERVICE_URL).build();
-        return webClient.get()
-                .uri("/payments") // Assuming you have an endpoint that returns all payments
+
+        return webclient.get()
+                .uri("/payments")
                 .retrieve()
                 .bodyToFlux(Payment.class)
                 .flatMap(payment -> {
-                    // For each payment, we make another call to the User Microservice to get user details
-                    return webClientBuilder.baseUrl(USER_SERVICE_URL)
-                            .build()
-                            .get()
-                            .uri("/users/" + payment.getUserId()) // Assuming you fetch user by their userId
+
+                    Mono < Order > orderMono = webClientBuilder.baseUrl(ORDER_SERVICE_URL).build().get()
+                            .uri("/orders/{orderId}", payment.getOrderId())
                             .retrieve()
-                            .bodyToMono(User.class)
-                            .map(user -> new PaymentResponse(payment, user)); // Combine the payment and user info
+                            .bodyToMono(Order.class);
+
+                    return orderMono.flatMap(order -> {
+
+                        return webClientBuilder.baseUrl(USER_SERVICE_URL).build().get()
+                                .uri("/users/{userId}", order.getUserId())
+                                .retrieve()
+                                .bodyToMono(User.class)
+                                .map(user -> new PaymentResponse(payment, order, user));
+                    });
+
                 })
-                .collectList(); // Collect all responses into a list
+                .collectList();
     }
 
     // Get a list of payments
@@ -105,10 +127,5 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.OK).body(updatedPayment);
     }
 
-    // Test
-    //        @GetMapping("/test")
-    //        public String testEndpoint() {
-    //            return "GET request is working!";
-    //        }
 
 }
