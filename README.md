@@ -1,9 +1,9 @@
 ## Microservices-applikation med Spring Boot och MySQL
 
  I have build a microservice that is one of four microservices in E-handel application. It connect to user microservice an order user microservice.
- Payment server port is 8082
- User server port is 8081
- Order server port is 8083
+ - Payment server port is 8082
+ - User server port is 8081
+ - Order server port is 8083
  
 REST API endpoints:
 -  [POST]  - /payments <=> Creates a new payment. It needs a body like this:
