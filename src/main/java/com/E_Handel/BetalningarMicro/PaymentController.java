@@ -28,8 +28,7 @@ public class PaymentController {
         this.paymentRepository = paymentRepository;
     }
 
-
-
+    // Create a new payment
 
     @PostMapping
     public Payment createPayment(@RequestBody Payment payment) {
@@ -43,25 +42,19 @@ public class PaymentController {
     public Mono<PaymentResponse> getPaymentById(@PathVariable Long id) {
         // Fetch the Payment from the Payment Service using paymentRepository
         return paymentRepository.findById(id)
-                .map(payment -> {
-
-                    return webClientBuilder.baseUrl(ORDER_SERVICE_URL)
-                            .build()
-                            .get()
-                            .uri("/orders/{orderId}", payment.getOrderId())
-                            .retrieve()
-                            .bodyToMono(Order.class)
-                            .flatMap(order -> {
-
-                                return webClientBuilder.baseUrl(USER_SERVICE_URL)
-                                        .build()
-                                        .get()
-                                        .uri("/users/{userId}", order.getUserId())
-                                        .retrieve()
-                                        .bodyToMono(User.class)
-                                        .map(user -> new PaymentResponse(payment, order, user));
-                            });
-                })
+                .map(payment -> webClientBuilder.baseUrl(ORDER_SERVICE_URL)
+                        .build()
+                        .get()
+                        .uri("/orders/{orderId}", payment.getOrderId())
+                        .retrieve()
+                        .bodyToMono(Order.class)
+                        .flatMap(order -> webClientBuilder.baseUrl(USER_SERVICE_URL)
+                                .build()
+                                .get()
+                                .uri("/users/{userId}", order.getUserId())
+                                .retrieve()
+                                .bodyToMono(User.class)
+                                .map(user -> new PaymentResponse(payment, order, user))))
                 .orElse(Mono.empty()); // Handle case when payment is not found
     }
 
@@ -83,14 +76,11 @@ public class PaymentController {
                             .retrieve()
                             .bodyToMono(Order.class);
 
-                    return orderMono.flatMap(order -> {
-
-                        return webClientBuilder.baseUrl(USER_SERVICE_URL).build().get()
-                                .uri("/users/{userId}", order.getUserId())
-                                .retrieve()
-                                .bodyToMono(User.class)
-                                .map(user -> new PaymentResponse(payment, order, user));
-                    });
+                    return orderMono.flatMap(order -> webClientBuilder.baseUrl(USER_SERVICE_URL).build().get()
+                            .uri("/users/{userId}", order.getUserId())
+                            .retrieve()
+                            .bodyToMono(User.class)
+                            .map(user -> new PaymentResponse(payment, order, user)));
 
                 })
                 .collectList();
@@ -111,7 +101,7 @@ public class PaymentController {
     @DeleteMapping("/{id}")
     public ResponseEntity < Void > deletePayment(@PathVariable Long id) {
         Optional < Payment > payment = paymentRepository.findById(id);
-        if (!payment.isPresent()) {
+        if (payment.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         paymentRepository.delete(payment.get());
@@ -124,11 +114,12 @@ public class PaymentController {
     @PutMapping("/{id}")
     public ResponseEntity < Payment > updatePayment(@PathVariable Long id, @RequestBody Payment paymentDetails) {
         Optional < Payment > existingPayment = paymentRepository.findById(id);
-        if (!existingPayment.isPresent()) {
+        if (existingPayment.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if the payment is not found
         }
         Payment paymentToUpdate = existingPayment.get();
         paymentToUpdate.setUserId(paymentDetails.getUserId());
+        paymentToUpdate.setOrderId(paymentDetails.getOrderId());
         paymentToUpdate.setAmount(paymentDetails.getAmount());
         paymentToUpdate.setPaymentStatus(paymentDetails.getPaymentStatus());
         paymentToUpdate.setPaymentDate(paymentDetails.getPaymentDate());
