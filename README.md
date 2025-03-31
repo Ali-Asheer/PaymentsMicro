@@ -9,10 +9,11 @@ REST API endpoints:
 -  [POST]  - /payments <=> Creates a new payment. It needs a body like this:
 ```
 {
-    "userId": 2,
-    "amount": 55990.00,
-    "paymentStatus": "Success",
-    "paymentDate": "02-07-2025 22:13:39"
+    "userId": 1,
+    "orderId": 2,
+    "amount": 1152.00,
+    "paymentStatus": "ok",
+    "paymentDate": "02-07-2024 22:13:39"
 }
 ```
 -  [GET] - /payments/{id} <=> Get a payment with user and orders and Total amount by a payment ID.
@@ -22,10 +23,11 @@ REST API endpoints:
 -  [PUT] /payments/{id} <=> Updates a payments by a payment ID. It needs a body like this:
 ```
 {
-    "userId": 2,
-    "amount": 55990.00,
-    "paymentStatus": "Success",
-    "paymentDate": "02-07-2025 22:13:39"
+    "userId": 1,
+    "orderId": 2,
+    "amount": 1152.00,
+    "paymentStatus": "ok",
+    "paymentDate": "02-07-2024 22:13:39"
 }
 ```
 

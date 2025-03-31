@@ -19,6 +19,13 @@ public class PaymentResponse {
         this.user = user;
     }
 
+    public PaymentResponse(Payment payment, double totalAmount, Order order, User user) {
+        this.payment = payment;
+        this.totalAmount = totalAmount;
+        this.order = order;
+        this.user = user;
+    }
+
     public PaymentResponse(Payment payment, Order order) {
         this.payment = payment;
         this.order = order;
@@ -28,7 +35,6 @@ public class PaymentResponse {
     // Method to calculate total amount
     private double calculateTotalAmount() {
         return order.getQuantity() * payment.getAmount();  // Quantity * Price per item
-
     }
 
 

@@ -12,6 +12,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/payments")
 public class PaymentController {
+
     @Autowired
     private WebClient.Builder webClientBuilder;
     private final WebClient webclient;
@@ -21,13 +22,14 @@ public class PaymentController {
 
 
 
-    public PaymentController(WebClient.Builder webclientBuilder, PaymentRepository paymentRepository) {
+    public PaymentController( WebClient.Builder webclientBuilder, PaymentRepository paymentRepository) {
+
         this.webclient = webclientBuilder.baseUrl("http://localhost:8082").build();
         this.paymentRepository = paymentRepository;
     }
 
 
-    // Create a payment
+
 
     @PostMapping
     public Payment createPayment(@RequestBody Payment payment) {
@@ -42,22 +44,22 @@ public class PaymentController {
         // Fetch the Payment from the Payment Service using paymentRepository
         return paymentRepository.findById(id)
                 .map(payment -> {
-                    // Fetch the Order related to the Payment using Order Microservice
-                    return webClientBuilder.baseUrl("http://localhost:8083")  // Order Service URL
+
+                    return webClientBuilder.baseUrl(ORDER_SERVICE_URL)
                             .build()
                             .get()
-                            .uri("/orders/{orderId}", payment.getOrderId())  // Fetch Order by Order ID
+                            .uri("/orders/{orderId}", payment.getOrderId())
                             .retrieve()
-                            .bodyToMono(Order.class)  // Convert response to Mono<Order>
+                            .bodyToMono(Order.class)
                             .flatMap(order -> {
-                                // Step 3: Fetch the User related to the Order using User Microservice
-                                return webClientBuilder.baseUrl("http://localhost:8081")  // User Service URL
+
+                                return webClientBuilder.baseUrl(USER_SERVICE_URL)
                                         .build()
                                         .get()
-                                        .uri("/users/{userId}", order.getUserId())  // Fetch User by User ID
+                                        .uri("/users/{userId}", order.getUserId())
                                         .retrieve()
-                                        .bodyToMono(User.class)  // Convert response to Mono<User>
-                                        .map(user -> new PaymentResponse(payment, order, user));  // Combine Payment, Order, and User
+                                        .bodyToMono(User.class)
+                                        .map(user -> new PaymentResponse(payment, order, user));
                             });
                 })
                 .orElse(Mono.empty()); // Handle case when payment is not found
